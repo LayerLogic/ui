@@ -5,6 +5,7 @@ export class SerialCommunication {
     this.port = null;
     this.reader = null;
     this.writer = null;
+    this.isConnected = false;
   }
 
   async connect() {
@@ -12,6 +13,7 @@ export class SerialCommunication {
       this.port = await navigator.serial.requestPort();
       await this.port.open({ baudRate: 115200 });
       log("Connected to Serial Port!", "success");
+      this.isConnected = true;
 
       const textDecoder = new TextDecoderStream();
       this.port.readable.pipeTo(textDecoder.writable);
@@ -20,7 +22,10 @@ export class SerialCommunication {
       return true;
     } catch (error) {
       log(`Error connecting: ${error}`, "error");
+      this.isConnected = false;
       return false;
+    } finally {
+      this.isConnected = false;
     }
   }
 

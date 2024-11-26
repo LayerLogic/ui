@@ -3,19 +3,82 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LayerLogic - UI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>LayerLogic - Researchers' UI</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+
     <script type="module" src="main.js"></script>
     <style>
       body {
-        font-family: Arial, sans-serif;
+        font-family: Poppins;
         margin: 0;
-        padding: 20px;
         display: flex;
         min-height: 100vh;
         box-sizing: border-box;
+      }
+
+      .side-bar {
+        width: 360px;
+        height: auto;
+        padding: 12px 16px;
+        background-color: #f4f4f5;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .status-widget {
+        width: 128px;
+        height: 32px;
+        background-color: #09090b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        padding: 4px 12px;
+        cursor: pointer;
+      }
+
+      .status-circle {
+        width: 12px;
+        height: 12px;
+        background-color: #f44336;
+        border-radius: 12px;
+        margin-right: 8px;
+        flex-shrink: 0;
+      }
+
+      .status {
+        color: #f4f4f5;
+        font-size: 14px;
+      }
+
+      .commands-container {
+        margin: 12px 0px;
+      }
+
+      .button-container {
+        display: flex;
+      }
+
+      .stop-button {
+        margin-right: 8px;
+        background-color: #f44336;
+        border: none;
+        color: #f0f0f0;
+        border-radius: 8px;
+      }
+
+      .clear-chart-button {
+        background-color: white;
+        color: #09090b;
       }
 
       .left-panel {
@@ -30,6 +93,90 @@
         min-width: 0; /* Allows the panel to shrink below its content width */
         height: calc(100vh - 40px); /* Full height minus padding */
         position: relative;
+      }
+
+      .main-screen {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .gate-icon,
+      .time-icon {
+        width: 24px;
+        aspect-ratio: 1 /1;
+      }
+
+      .menu-container {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        display: flex;
+        padding: 8px 4px;
+        border-radius: 16px;
+        border: 1px solid #d4d4d8;
+        background: #f4f4f5;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+      }
+
+      .gate-sweep-button,
+      .time-sweep-button {
+        background-color: black;
+        color: #f0f0f0;
+        width: 44px;
+        aspect-ratio: 1 / 1;
+        margin: 0px 6px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+      }
+
+      /* Tooltip Styles */
+      .gate-sweep-button::after,
+      .time-sweep-button::after {
+        content: attr(
+          data-tooltip
+        ); /* Use the data-tooltip attribute for the text */
+        position: absolute;
+        bottom: 150%; /* Position above the button */
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 4px;
+        white-space: nowrap; /* Prevent tooltip from breaking onto multiple lines */
+        font-size: 12px;
+        opacity: 0; /* Hidden by default */
+        visibility: hidden;
+        z-index: 10;
+      }
+
+      /* Tooltip Arrow */
+      .gate-sweep-button::before,
+      .time-sweep-button::before {
+        content: "";
+        position: absolute;
+        bottom: 125%; /* Adjust for tooltip arrow */
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: #333 transparent transparent transparent; /* Creates a triangle */
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      /* Show Tooltip on Hover */
+      .gate-sweep-button:hover::after,
+      .gate-sweep-button:hover::before,
+      .time-sweep-button:hover::after,
+      .time-sweep-button:hover::before {
+        opacity: 1;
+        visibility: visible;
       }
 
       h1 {
@@ -62,19 +209,24 @@
         margin: 5px 0;
         font-size: 14px;
         cursor: pointer;
-        background-color: #f0f0f0;
+        background-color: #09090b;
+        color: #f0f0f0;
         border: 1px solid #ccc;
-        border-radius: 4px;
+        border-radius: 8px;
       }
 
       button:hover {
-        background-color: #e0e0e0;
+        opacity: 75%;
       }
 
       #saveDataButton {
         background-color: #4caf50;
         color: white;
         border: none;
+      }
+
+      #saveDataButton:hover {
+        opacity: 75%;
       }
 
       #console {
@@ -88,6 +240,10 @@
         margin: 0;
       }
 
+      #startGateAnalysisButton {
+        margin-top: 12px;
+      }
+
       button:disabled {
         opacity: 0.6;
         cursor: not-allowed;
@@ -98,17 +254,22 @@
         width: 100% !important;
         height: 100% !important;
       }
+
       .sweep-controls {
-        background: #f5f5f5;
-        padding: 15px;
-        border-radius: 4px;
-        margin: 10px 0;
+        background: white;
+        padding: 16px;
+        border-radius: 16px;
       }
 
       .input-group {
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         display: flex;
         align-items: center;
+        justify-content: space-between;
+      }
+
+      .input-group:last-child {
+        margin-bottom: 0px;
       }
 
       .input-group label {
@@ -137,8 +298,7 @@
       }
     </style>
   </head>
-  <body>
-    <div class="left-panel">
+  <!-- <div class="left-panel">
       <div class="sweep-controls">
         <h1>Gate Analysis</h1>
         <div class="input-group">
@@ -192,368 +352,88 @@ ACset, 1.1, 210, 3, 550</textarea
         <canvas id="myChart"></canvas>
         <canvas id="myChart2"></canvas>
       </div>
+    </div> -->
+
+  <body>
+    <nav class="side-bar">
+      <div class="controls-container">
+        <button class="status-widget">
+          <div class="status-circle"></div>
+          <div id="connectButton" class="status">Disconnected</div>
+        </button>
+        <div class="commands-container">
+          <textarea name="Commands" id="commandsTextArea">
+s, 2
+ACset, 1.1, 210, 3, 550</textarea
+          >
+        </div>
+        <div class="sweep-controls">
+          <div class="input-group">
+            <label>dV:</label>
+            <input type="number" id="stepSize" value="0.03" step="0.01" />
+          </div>
+          <div class="input-group">
+            <label>Min:</label>
+            <input type="number" id="vgMin" value="-0.4" step="0.1" />
+          </div>
+          <div class="input-group">
+            <label>Max:</label>
+            <input type="number" id="vgMax" value="0.4" step="0.1" />
+          </div>
+        </div>
+        <div class="time-controls" style="display: none">
+          <div class="input-group">
+            <label>V Gate:</label>
+            <input type="number" id="stepSize" value="1.2" step="0.01" />
+          </div>
+          <div class="input-group">
+            <label>Delay:</label>
+            <input type="number" id="vgMin" value="500" step="0.1" />
+          </div>
+        </div>
+        <button id="startGateAnalysisButton">Run</button>
+        <div class="button-container">
+          <button id="stopButton" class="stop-button">Stop</button>
+          <button id="saveDataButton">Save Data</button>
+        </div>
+      </div>
+      <div id="console"></div>
+    </nav>
+    <div class="main-screen">
+      <div class="menu-container">
+        <div class="gate-sweep-button" data-tooltip="Gate Analysis">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="gate-icon"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+            />
+          </svg>
+        </div>
+        <div class="time-sweep-button" data-tooltip="Time Analysis">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="time-icon"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+            />
+          </svg>
+        </div>
+      </div>
     </div>
-
-    <script type="module">
-      // import { log } from "./utils.js";
-      // import { createGateChartConfig } from "./chartsConfig.js";
-
-      // let port;
-      // let reader;
-      // let writer;
-      // let isGateAnalysisRunning = false;
-      // let currentGateAnalysisValue = 0.0;
-      // let gateAnalysisResolver = null;
-      // let isIncreasing = false;
-      // const summary = [];
-
-      // // Chart data arrays
-      // let chartData = {
-      //   vgValues: [],
-      //   r1Values: [],
-      //   r2Values: [],
-      // };
-
-      // let stepSize = 0.03;
-      // let vgMin = -0.2;
-      // let vgMax = 0.2;
-
-      // // Input handlers
-      // document.getElementById("stepSize").addEventListener("change", (e) => {
-      //   stepSize = Math.abs(parseFloat(e.target.value)) || 0.03;
-      //   e.target.value = stepSize;
-      // });
-
-      // document.getElementById("vgMin").addEventListener("change", (e) => {
-      //   vgMin = parseFloat(e.target.value) || -1;
-      //   e.target.value = vgMin;
-
-      //   // Update the annotation
-      //   myChart.options.plugins.annotation.annotations.vgminLine.xMin = vgMin;
-      //   myChart.options.plugins.annotation.annotations.vgminLine.xMax = vgMin;
-      //   myChart.options.plugins.annotation.annotations.vgminLine.label.content = `Vg min: ${vgMin}`;
-      //   myChart.update();
-      // });
-
-      // document.getElementById("vgMax").addEventListener("change", (e) => {
-      //   vgMax = parseFloat(e.target.value) || 1;
-      //   e.target.value = vgMax;
-      // });
-
-      // Modify the Start Gate Analysis function
-      // document
-      //   .getElementById("startGateAnalysisButton")
-      //   .addEventListener("click", async () => {
-      //     if (!port || !writer) {
-      //       log("Please connect to serial port first!", "error");
-      //       return;
-      //     }
-
-      //     if (isGateAnalysisRunning) {
-      //       log("Gate analysis is already running!", "error");
-      //       return;
-      //     }
-
-      //     // Clear existing data
-      //     chartData = {
-      //       vgValues: [],
-      //       r1Values: [],
-      //       r2Values: [],
-      //     };
-
-      //     // Clear chart
-      //     myChart.data.labels = [];
-      //     myChart.data.datasets[0].data = [];
-      //     myChart.data.datasets[1].data = [];
-      //     myChart.update();
-
-      //     isGateAnalysisRunning = true;
-      //     isIncreasing = true;
-
-      //     try {
-      //       while (isGateAnalysisRunning) {
-      //         // Send current value
-      //         const command = `ACgn, ${currentGateAnalysisValue.toFixed(2)}`;
-      //         const commandWithNewline = command + "\n";
-      //         const encoder = new TextEncoder();
-      //         const data = encoder.encode(commandWithNewline);
-
-      //         await writer.write(data);
-      //         log(`Sent: ${command}`, "send");
-
-      //         await new Promise((resolve) => {
-      //           gateAnalysisResolver = resolve;
-      //         });
-
-      //         // Calculate next value based on direction
-      //         if (isIncreasing) {
-      //           currentGateAnalysisValue += stepSize;
-      //           if (currentGateAnalysisValue >= vgMax) {
-      //             isIncreasing = false;
-      //             log("Reached Vg Max, bouncing back", "info");
-      //           }
-      //         } else {
-      //           currentGateAnalysisValue -= stepSize;
-      //           if (currentGateAnalysisValue <= vgMin) {
-      //             isIncreasing = true;
-      //             log("Reached Vg Min, bouncing back", "info");
-      //           }
-      //         }
-      //       }
-      //     } catch (error) {
-      //       log(`Gate Analysis error: ${error}`, "error");
-      //     } finally {
-      //       isGateAnalysisRunning = false;
-      //     }
-      //   });
-
-      // // Parse response data and update chart
-      // function parseResponseAndUpdateChart(response, vgValue) {
-      //   const values = response.split(",").map((v) => parseFloat(v.trim()));
-      //   const x_gain = values[0];
-      //   const y_gain = values[1];
-      //   const current_AC = values[2];
-      //   const frequency = values[3];
-      //   const resistance_left = x_gain / current_AC;
-      //   const resistance_right = y_gain / current_AC;
-      //   const res = {};
-      //   res["Vg"] = vgValue;
-      //   res["X"] = x_gain;
-      //   res["Y"] = y_gain;
-      //   res["I"] = current_AC;
-      //   res["F"] = frequency;
-      //   summary.push(res);
-
-      //   if (values.length >= 2) {
-      //     // Simply append new values to arrays
-      //     chartData.vgValues.push(vgValue.toFixed(2));
-      //     chartData.r1Values.push(resistance_left);
-      //     chartData.r2Values.push(resistance_right);
-
-      //     // Update chart with all data
-      //     myChart.data.labels = chartData.vgValues;
-      //     myChart.data.datasets[0].data = chartData.r1Values;
-      //     myChart.data.datasets[1].data = chartData.r2Values;
-      //     myChart.update();
-      //   }
-      // }
-
-      // const annotation = {
-      //   type: "line",
-      //   xMin: vgMin, // Use vgMin instead of 0
-      //   xMax: vgMin, // Use vgMin instead of 0
-      //   borderColor: "blue",
-      //   borderWidth: 2,
-      //   borderDash: [5, 5],
-      //   label: {
-      //     content: `Vg min: ${vgMin}`,
-      //     enabled: true,
-      //     position: "top",
-      //   },
-      // };
-
-      // // Chart.register(ChartAnnotation);
-      // // Chart.js initialization with dual y-axes
-      // // const ctx = document.getElementById("myChart").getContext("2d");
-      // // const myChart = new Chart(ctx, createGateChartConfig());
-
-      // // Reset Zoom button
-      // document
-      //   .getElementById("resetZoomButton")
-      //   .addEventListener("click", () => {
-      //     myChart.resetZoom();
-      //   });
-
-      // // Clear Chart button
-      // document
-      //   .getElementById("clearChartButton")
-      //   .addEventListener("click", () => {
-      //     chartData = {
-      //       vgValues: [],
-      //       r1Values: [],
-      //       r2Values: [],
-      //     };
-      //     myChart.data.labels = [];
-      //     myChart.data.datasets[0].data = [];
-      //     myChart.data.datasets[1].data = [];
-      //     myChart.update();
-      //     log("Chart cleared", "info");
-      //   });
-
-      // // Connect to Serial Port
-      // document
-      //   .getElementById("connectButton")
-      //   .addEventListener("click", async () => {
-      //     try {
-      //       port = await navigator.serial.requestPort();
-      //       await port.open({ baudRate: 115200 });
-      //       log("Connected to Serial Port!", "success");
-
-      //       const textDecoder = new TextDecoderStream();
-      //       const readableStreamClosed = port.readable.pipeTo(
-      //         textDecoder.writable
-      //       );
-      //       reader = textDecoder.readable.getReader();
-      //       writer = port.writable.getWriter();
-
-      //       readSerialData();
-      //     } catch (error) {
-      //       log(`Error connecting: ${error}`, "error");
-      //     }
-      //   });
-
-      // // Read Serial Data
-      // async function readSerialData() {
-      //   let receivedBuffer = "";
-
-      //   try {
-      //     while (true) {
-      //       const { value, done } = await reader.read();
-      //       if (done) break;
-      //       if (value) {
-      //         receivedBuffer += value;
-
-      //         const lines = receivedBuffer.split("\n");
-
-      //         while (lines.length > 1) {
-      //           const line = lines.shift().trim();
-      //           if (line) {
-      //             log(`Received: ${line}`, "info");
-
-      //             if (isGateAnalysisRunning && gateAnalysisResolver) {
-      //               parseResponseAndUpdateChart(line, currentGateAnalysisValue);
-      //               gateAnalysisResolver(line);
-      //               gateAnalysisResolver = null;
-      //             }
-      //           }
-      //         }
-
-      //         receivedBuffer = lines[0];
-      //       }
-      //     }
-      //   } catch (error) {
-      //     log(`Read error: ${error}`, "error");
-      //   }
-      // }
-
-      // // Send Commands Sequentially
-      // document
-      //   .getElementById("sendCommandsButton")
-      //   .addEventListener("click", async () => {
-      //     if (!port || !writer) {
-      //       log("Please connect to serial port first!", "error");
-      //       return;
-      //     }
-
-      //     const commands = document
-      //       .getElementById("commandsTextArea")
-      //       .value.trim()
-      //       .split("\n");
-
-      //     try {
-      //       for (const command of commands) {
-      //         const commandWithNewline = command.trim() + "\n";
-      //         const encoder = new TextEncoder();
-      //         const data = encoder.encode(commandWithNewline);
-
-      //         await writer.write(data);
-      //         log(`Sent: ${command}`, "send");
-
-      //         await new Promise((resolve) => setTimeout(resolve, 500));
-      //       }
-      //     } catch (error) {
-      //       log(`Send error: ${error}`, "error");
-      //     }
-      //   });
-
-      // // Stop Button
-      // document.getElementById("stopButton").addEventListener("click", () => {
-      //   if (isGateAnalysisRunning) {
-      //     isGateAnalysisRunning = false;
-      //     log("Gate Analysis Stopped", "info");
-      //   }
-      // });
-
-      // // Clean up on page unload
-      // window.addEventListener("beforeunload", async () => {
-      //   if (port) {
-      //     try {
-      //       if (reader) reader.releaseLock();
-      //       if (writer) writer.releaseLock();
-      //       await port.close();
-      //     } catch (error) {
-      //       console.error("Error closing port:", error);
-      //     }
-      //   }
-      // });
-
-      // function saveDataToTxt() {
-      //   if (chartData.vgValues.length === 0) {
-      //     log("No data to save!", "error");
-      //     return;
-      //   }
-
-      //   // Create text content with consistent spacing
-      //   let textContent =
-      //     "Vg (V)\t\tX (mV)\t\t\tY (mV)\t\t\tI (uA)\t\t\tf (Hz)\n\n\n"; // Headers with tab separation
-      //   // textContent += "-".repeat(40) + "\n"; // Separator line
-
-      //   // Add data rows with proper formatting
-      //   for (let i = 0; i < summary.length; i++) {
-      //     textContent += `${summary[i]["Vg"]}\t\t${summary[i]["X"].toFixed(
-      //       6
-      //     )}\t\t${summary[i]["Y"].toFixed(6)}\t\t${summary[i]["I"].toFixed(
-      //       6
-      //     )}\t\t${summary[i]["F"].toFixed(6)}\n`;
-      //   }
-
-      //   // Add summary statistics
-      //   // textContent += "\nSummary Statistics:\n";
-      //   // textContent += "-".repeat(40) + "\n";
-      //   // textContent += `Total Points: ${chartData.vgValues.length}\n`;
-      //   // textContent += `Vg Range: ${Math.min(
-      //   //   ...chartData.vgValues
-      //   // )} to ${Math.max(...chartData.vgValues)}\n`;
-      //   // textContent += `R1 Range: ${Math.min(...chartData.r1Values).toFixed(
-      //   //   6
-      //   // )} to ${Math.max(...chartData.r1Values).toFixed(6)} kΩ\n`;
-      //   // textContent += `R2 Range: ${Math.min(...chartData.r2Values).toFixed(
-      //   //   6
-      //   // )} to ${Math.max(...chartData.r2Values).toFixed(6)} kΩ\n`;
-
-      //   // Create blob and download link
-      //   const blob = new Blob([textContent], {
-      //     type: "text/plain;charset=utf-8",
-      //   });
-      //   const link = document.createElement("a");
-
-      //   // Create filename with timestamp
-      //   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      //   const filename = `gate_analysis_${timestamp}.txt`;
-
-      //   // Trigger download
-      //   if (window.navigator.msSaveOrOpenBlob) {
-      //     // For IE
-      //     window.navigator.msSaveBlob(blob, filename);
-      //   } else {
-      //     // For other browsers
-      //     const url = window.URL.createObjectURL(blob);
-      //     link.href = url;
-      //     link.style.display = "none";
-      //     link.setAttribute("download", filename);
-      //     document.body.appendChild(link);
-      //     link.click();
-      //     document.body.removeChild(link);
-      //     window.URL.revokeObjectURL(url);
-      //   }
-
-      //   log(`Data saved as ${filename}`, "success");
-      // }
-
-      // Update the click event listener for the save button
-      // document
-      //   .getElementById("saveDataButton")
-      //   .addEventListener("click", saveDataToTxt);
-    </script>
   </body>
 </html>
